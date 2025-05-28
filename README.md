@@ -146,7 +146,8 @@ Teknik data preparation atau preprocessing yang dilakukan adalah:
 - Scaling/standarisasi data supaya fitur numerik lebih stabil dan loss nantinya bisa terkontrol dan menghindari overfit
 
 ## Modeling
-Pada tahap ini dikembangkan dua pendekatan sistem rekomendasi _collaborative filtering_ dengan algoritma yang berbeda, yaitu Matrix Factorization (menggunakan metode SVD) dan RecommenderNet (berbasis deep learning). Keduanya dirancang untuk memprediksi rating buku oleh pengguna dan menghasilkan Top-N rekomendasi yang dipersonalisasi sebagai berikut:
+Pada tahap ini dikembangkan dua pendekatan sistem rekomendasi _collaborative filtering_ dengan algoritma yang berbeda, yaitu Matrix Factorization (menggunakan metode SVD) dan RecommenderNet (berbasis _deep learning_). Keduanya dirancang untuk memprediksi rating buku oleh pengguna dan menghasilkan Top-N rekomendasi yang dipersonalisasi sebagai berikut:
+
 Top-N rekomendasi menggunakan SVD:
 ![top-n SVD](image/topn1.png)
 
