@@ -74,20 +74,25 @@ Sebagian besar buku memiliki sekitar 100 ulasan, meskipun ada beberapa yang memi
 Untuk memahami struktur dan kualitas data, beberapa langkah Exploratory Data Analysis (EDA) dilakukan, antara lain:
 - Variabel Books
     - Mengidentifikasi bentuk dataset dan struktur
+      
       ![info books](image/info.png)
+      
       Pada atribut `original_publication_year`, terdapat beberapa data yang termasuk null content. Penggunaan authors dan original_publication_year ini hanya untuk mengetahui apakah ada duplikasi data buku atau tidak, maka data dengan outlier `original_publication_year` akan dibiarkan.
     - Mengidentifikasi statistik fitur numerik untuk menentukan outlier dan perlakuan
       ![outlier books](image/outlier.png)
+      
       Terdapat tahun -1750 pada fitur original_publication_year, yang merupakan outlier. Namun, karena fitur ini tidak akan digunakan dalam modelling, maka diabaikan saja.
     - Memeriksa duplikasi data; Terdapat 36 buah baris duplikat judul, namun ketika dicek duplikat judul buku memang sama, namun data atribut/fitur lain berbeda.
     - Memeriksa data null; Terdapat 21 data null di `original_publication_year`, namun data null ini tidak perlu diatasi/dihilangkan
     - Memeriksa nilai unik `book_id`; Sudah memiliki nilai unique yang sudah berupa integer terurut, sehingga kemungkinan tidak memerlukan proses encoding nantinya apabila nilai unik tetap.
     - Visualisasi distribusi average rating
+      
       ![distribusi average rating](image/distavgbook.png)
+      
       Di dataset ini, buku yang di-rating oleh pembaca kebanyakan memiliki rating di sekitar angka 4.0
       
 - Variabel Rating
-    -  Mengidentifikasi bentuk dataset dan struktur; Cukup terlihat bahwa tidak ada data null atau outlier, nanti akan diperiksa ulang
+    -  Mengidentifikasi bentuk dataset dan struktur; Cukup terlihat bahwa tidak ada data null atau outlier, nanti akan diperiksa ulang.
     -  Memeriksa duplikasi data
         ```
         Jumlah baris duplikat: 1644
@@ -96,21 +101,33 @@ Untuk memahami struktur dan kualitas data, beberapa langkah Exploratory Data Ana
         ```
         Dari hasil 2209 pasangan user-buku unik yang muncul lebih dari sekali, dan total jumlah rating-nya 4487. di atas, dapat disimpulkan bahwa ada user yang memberi rating ke buku yang sama lebih dari dua kali.   
     -  Memeriksa data null dan nilai unik rating
+      
        ![cek null dan outlier](image/nullrating.png)
+       
     -  Memeriksa perbedaan antara book_id di books dan rating
+      
        ![cek perbedaan book & rating](image/bookratingdiff.png)
+       
        Supaya output rekomendasi yang dihasilkan jelas dan memiliki judul buku, maka sistem rekomendasi hanya akan memanfaatkan 812 buku ini.
     -  Memeriksa apabila nilai unique sudah urut atau memerlukan encoding
+      
        ![nilai unique rating](image/unique2.png)
+       
        Walaupun id unique sudah berurutan, hanya 812 buku yang akan digunakan. Ada kemungkinan ID tidak akan terurut lagi (terdapat angka urutan yang terlompat)
     -  Visualisasi distribusi rating
+      
        ![dist rating](image/distrating.png)
+       
        Mayoritas rating yang diberikan oleh pengguna berada pada rentang 3 hingga 5, dengan rating 4 yang mendominasi
     -  Visualisasi distribusi rating per user
+      
        ![dist rating per user](image/distperuser.png)
+       
        Banyak pengguna hanya memberikan beberapa rating, dengan sebagian besar berada di sisi kiri grafik, menandakan bahwa ada banyak pengguna yang hanya memberikan rating untuk beberapa buku saja.
     -  Visualisasi distribusi rating per buku
+      
        ![dist rating per buku](image/distperbuku.png)
+       
        Banyak buku mendapatkan rating yang cukup banyak, dengan buku yang mendapat 100 rating menjadi kelompok terbesar.
 
 ## Data Preparation
@@ -118,22 +135,29 @@ Teknik data preparation atau preprocessing yang dilakukan adalah:
 - Variabel Books
    - Menghilangkan fitur original_publication_year, average_rating, dan authors karena tidak relevan untuk pembuatan model Collaborative Filtering. Menyisakan fitur `book_id` dan `title`
    - Menyimpan mapping untuk memanggil title nantinya saat inference
+     ```
+     book_id_to_title = dict(zip(books['book_id'], books['title']))
+      ```
 - Variabel Rating
    - Mengatasi data duplikat, tepatnya pada user yang memberi rating ke buku yang sama lebih dari sekali. Untuk menghindari bias dalam representasi preferensi
-Pada bagian ini Anda menerapkan dan menyebutkan teknik data preparation yang dilakukan. Teknik yang digunakan pada notebook dan laporan harus berurutan.
-- Melakukan merge (inner join) antara `books` dan `rating` agar hanya buku yang memiliki informasi judul (title) dan telah diberi rating oleh pengguna yang diproses oleh model, sehingga hasil rekomendasi bisa ditampilkan secara lengkap dan relevan.
+- Melakukan _merge_ (_inner join_) antara `books` dan `rating` agar hanya buku yang memiliki informasi judul (title) dan telah diberi rating oleh pengguna yang diproses oleh model, sehingga hasil rekomendasi bisa ditampilkan secara lengkap dan relevan.
 - Encoding `user_id` dan `book_id`, ini diperlukan agar ID bersifat contiguous (berurutan dari 0) dan cocok digunakan dalam embedding layer model deep learning, karena layer ini hanya menerima integer index, serta menjaga agar memori tetap efisien.
 - Splitting data menjadi test dan train wajib dilakukan sebelum melakukan pemodelan serta train model.
 - Scaling/standarisasi data supaya fitur numerik lebih stabil dan loss nantinya bisa terkontrol dan menghindari overfit
 
 ## Modeling
-Pada tahap ini dikembangkan dua pendekatan sistem rekomendasi _collaborative filtering_ dengan algoritma yang berbeda, yaitu Matrix Factorization (menggunakan metode SVD) dan RecommenderNet (berbasis deep learning). Keduanya dirancang untuk memprediksi rating buku oleh pengguna dan menghasilkan Top-N rekomendasi yang dipersonalisasi.
+Pada tahap ini dikembangkan dua pendekatan sistem rekomendasi _collaborative filtering_ dengan algoritma yang berbeda, yaitu Matrix Factorization (menggunakan metode SVD) dan RecommenderNet (berbasis deep learning). Keduanya dirancang untuk memprediksi rating buku oleh pengguna dan menghasilkan Top-N rekomendasi yang dipersonalisasi sebagai berikut:
+Top-N rekomendasi menggunakan SVD:
+![top-n SVD](image/topn1.png)
+
+Top-N rekomendasi menggunakan RecommenderNet:
+![top-n recnet](image/topn2.png)
 
 Model Matrix Factorization bekerja dengan merepresentasikan pengguna dan item sebagai vektor embedding yang kemudian dikalikan untuk menghasilkan prediksi rating. Model ini cukup sederhana, efisien, dan cepat dalam proses pelatihan, serta cocok digunakan sebagai baseline karena performanya yang cukup stabil di data dengan pola linier. Hasil rekomendasinya pun terlihat tajam, meskipun cenderung ekstrem akibat aktivasi sigmoid yang mendorong prediksi ke nilai mendekati 0 atau 1. Kekurangan utama model ini adalah keterbatasannya dalam menangkap hubungan kompleks antara pengguna dan item.
 
 Sementara itu, RecommenderNet menggunakan pendekatan neural network yang memungkinkan model belajar dari pola non-linear dalam data. Model ini menunjukkan hasil prediksi yang lebih halus dan realistis dibanding SVD, serta lebih fleksibel dalam menangani data dengan variasi interaksi pengguna yang tinggi. Namun, model ini berpotensi mengalami underfitting jika arsitekturnya terlalu sederhana atau pelatihan belum optimal. Waktu pelatihan juga relatif lebih lama dibanding model matrix factorization.
 
-Kedua model berhasil memberikan rekomendasi buku terbaik untuk pengguna secara personal. Pemilihan pendekatan tergantung pada kebutuhan: SVD cocok untuk baseline cepat dan sederhana, sementara RecommenderNet lebih cocok untuk prediksi yang lebih dalam dan kompleks, selama proses tuning dilakukan dengan tepat.
+Kedua model berhasil memberikan rekomendasi buku terbaik untuk pengguna secara personal. Pemilihan pendekatan tergantung pada kebutuhan, yakni SVD cocok untuk baseline cepat dan sederhana, sementara RecommenderNet lebih cocok untuk prediksi yang lebih dalam dan kompleks, selama proses tuning dilakukan dengan tepat.
 
 ## Evaluation
 
