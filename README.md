@@ -127,27 +127,44 @@ Pada bagian ini Anda menerapkan dan menyebutkan teknik data preparation yang dil
 - Scaling/standarisasi data supaya fitur numerik lebih stabil dan loss nantinya bisa terkontrol dan menghindari overfit
 
 ## Modeling
-Tahapan ini membahas mengenai model sisten rekomendasi yang Anda buat untuk menyelesaikan permasalahan. Sajikan top-N recommendation sebagai output.
+Pada tahap ini dikembangkan dua pendekatan sistem rekomendasi _collaborative filtering_ dengan algoritma yang berbeda, yaitu Matrix Factorization (menggunakan metode SVD) dan RecommenderNet (berbasis deep learning). Keduanya dirancang untuk memprediksi rating buku oleh pengguna dan menghasilkan Top-N rekomendasi yang dipersonalisasi.
 
-**Rubrik/Kriteria Tambahan (Opsional)**: 
-- Menyajikan dua solusi rekomendasi dengan algoritma yang berbeda.
-- Menjelaskan kelebihan dan kekurangan dari solusi/pendekatan yang dipilih.
+Model Matrix Factorization bekerja dengan merepresentasikan pengguna dan item sebagai vektor embedding yang kemudian dikalikan untuk menghasilkan prediksi rating. Model ini cukup sederhana, efisien, dan cepat dalam proses pelatihan, serta cocok digunakan sebagai baseline karena performanya yang cukup stabil di data dengan pola linier. Hasil rekomendasinya pun terlihat tajam, meskipun cenderung ekstrem akibat aktivasi sigmoid yang mendorong prediksi ke nilai mendekati 0 atau 1. Kekurangan utama model ini adalah keterbatasannya dalam menangkap hubungan kompleks antara pengguna dan item.
+
+Sementara itu, RecommenderNet menggunakan pendekatan neural network yang memungkinkan model belajar dari pola non-linear dalam data. Model ini menunjukkan hasil prediksi yang lebih halus dan realistis dibanding SVD, serta lebih fleksibel dalam menangani data dengan variasi interaksi pengguna yang tinggi. Namun, model ini berpotensi mengalami underfitting jika arsitekturnya terlalu sederhana atau pelatihan belum optimal. Waktu pelatihan juga relatif lebih lama dibanding model matrix factorization.
+
+Kedua model berhasil memberikan rekomendasi buku terbaik untuk pengguna secara personal. Pemilihan pendekatan tergantung pada kebutuhan: SVD cocok untuk baseline cepat dan sederhana, sementara RecommenderNet lebih cocok untuk prediksi yang lebih dalam dan kompleks, selama proses tuning dilakukan dengan tepat.
 
 ## Evaluation
-Pada bagian ini Anda perlu menyebutkan metrik evaluasi yang digunakan. Kemudian, jelaskan hasil proyek berdasarkan metrik evaluasi tersebut.
 
-Ingatlah, metrik evaluasi yang digunakan harus sesuai dengan konteks data, problem statement, dan solusi yang diinginkan.
+### Metrik Evaluasi: RMSE
 
-**Rubrik/Kriteria Tambahan (Opsional)**: 
-- Menjelaskan formula metrik dan bagaimana metrik tersebut bekerja.
+Untuk mengevaluasi performa sistem rekomendasi, digunakan metrik **Root Mean Squared Error (RMSE)**, yang mengukur rata-rata akar kuadrat dari selisih antara rating aktual dengan rating yang diprediksi. RMSE dipilih karena mampu memberikan penalti lebih besar terhadap kesalahan prediksi yang ekstrem, sehingga cocok untuk mengevaluasi akurasi prediksi dalam sistem rekomendasi berbasis rating. Secara matematis, RMSE dirumuskan sebagai:
 
-**---Ini adalah bagian akhir laporan---**
+$$
+\text{RMSE} = \sqrt{ \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 }
+$$
 
-_Catatan:_
-- _Anda dapat menambahkan gambar, kode, atau tabel ke dalam laporan jika diperlukan. Temukan caranya pada contoh dokumen markdown di situs editor [Dillinger](https://dillinger.io/), [Github Guides: Mastering markdown](https://guides.github.com/features/mastering-markdown/), atau sumber lain di internet. Semangat!_
-- Jika terdapat penjelasan yang harus menyertakan code snippet, tuliskan dengan sewajarnya. Tidak perlu menuliskan keseluruhan kode project, cukup bagian yang ingin dijelaskan saja.
+di mana $y_i$ adalah rating aktual, $\hat{y}_i$ adalah rating hasil prediksi, dan $n$ adalah jumlah sampel.
+
+### Hasil Evaluasi Model
+
+Berdasarkan hasil pelatihan dan pengujian:
+
+```
+===== Perbandingan Model =====
+Matrix Factorization RMSE:  0.5531
+RecommenderNet RMSE:        0.1904
+```
+
+Model **RecommenderNet** menghasilkan nilai RMSE yang jauh lebih rendah dibandingkan Matrix Factorization. Ini menunjukkan bahwa model deep learning ini memiliki kemampuan prediksi yang lebih akurat terhadap preferensi pengguna.
+
+![learning curve](image/learningcurve.png)
+Performa ini juga tercermin dari **learning curve** RecommenderNet. Grafik menunjukkan penurunan tajam pada train loss di awal pelatihan dan kestabilan pada train maupun validation loss setelah beberapa epoch, menandakan model cepat konvergen dan tidak mengalami overfitting. Validation loss dan RMSE cenderung lebih rendah dibandingkan data latih, mengindikasikan generalisasi model yang sangat baik. Dengan performa validasi yang konsisten dan RMSE rendah, RecommenderNet terbukti lebih andal sebagai solusi sistem rekomendasi pada proyek ini.
 
 ## Referensi
 [1] Onkar A. More, Shubham S. Kore, Kabir G. Kharade. "Book Recommendation System using Machine Learning," International Journal on Advanced Computer Theory and Engineering, vol. 14, no. 1, pp. 60–65, 2025. [Online]. Tersedia: journals.mriindia.com
+
 [2] Sutan Abeng Pratama. (2025). Development Of A Book Recommendation System Using Collaborative Filtering. Jurnal Komputer, 2(2), 81–86. https://doi.org/10.70963/jk.v2i2.112 
+
 [3] Akhila Miriyala, Pranitha Chikondra, Sarayu Alwala, Nadia Anjum. (2025). Book Recommendation System Using Collaborative Filtering. International Journal Of Novel Research And Development, 10(3). 
