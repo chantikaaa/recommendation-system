@@ -25,8 +25,6 @@ Menjelaskan tujuan proyek yang menjawab pernyataan masalah:
 - Membangun model deep learning yang dapat memprediksi tingkat kesukaan pengguna terhadap buku tertentu.
 - Memanfaatkan data interaksi pengguna dan buku sebagai input untuk sistem rekomendasi.
 
-Semua poin di atas harus diuraikan dengan jelas. Anda bebas menuliskan berapa pernyataan masalah dan juga goals yang diinginkan.
-
 ### Solution statements
 Untuk mencapai tujuan-tujuan tersebut, beberapa pendekatan solusi diterapkan dan dibandingkan:
 
@@ -83,9 +81,9 @@ Untuk memahami struktur dan kualitas data, beberapa langkah Exploratory Data Ana
       
       Terdapat tahun -1750 pada fitur original_publication_year, yang merupakan outlier. Namun, karena fitur ini tidak akan digunakan dalam modelling, maka diabaikan saja.
     - Memeriksa duplikasi data; Terdapat 36 buah baris duplikat judul, namun ketika dicek duplikat judul buku memang sama, namun data atribut/fitur lain berbeda.
-    - Memeriksa data null; Terdapat 21 data null di `original_publication_year`, namun data null ini tidak perlu diatasi/dihilangkan
+    - Memeriksa data null; Terdapat 21 data null di `original_publication_year`, namun data null ini tidak perlu diatasi/dihilangkan.
     - Memeriksa nilai unik `book_id`; Sudah memiliki nilai unique yang sudah berupa integer terurut, sehingga kemungkinan tidak memerlukan proses encoding nantinya apabila nilai unik tetap.
-    - Visualisasi distribusi average rating
+    - Visualisasi distribusi average rating.
       
       ![distribusi average rating](image/distavgbook.png)
       
@@ -113,12 +111,12 @@ Untuk memahami struktur dan kualitas data, beberapa langkah Exploratory Data Ana
       
        ![nilai unique rating](image/unique2.png)
        
-       Walaupun id unique sudah berurutan, hanya 812 buku yang akan digunakan. Ada kemungkinan ID tidak akan terurut lagi (terdapat angka urutan yang terlompat)
+       Walaupun id unique sudah berurutan, hanya 812 buku yang akan digunakan. Ada kemungkinan ID tidak akan terurut lagi (terdapat angka urutan yang terlompat).
     -  Visualisasi distribusi rating
       
        ![dist rating](image/distrating.png)
        
-       Mayoritas rating yang diberikan oleh pengguna berada pada rentang 3 hingga 5, dengan rating 4 yang mendominasi
+       Mayoritas rating yang diberikan oleh pengguna berada pada rentang 3 hingga 5, dengan rating 4 yang mendominasi.
     -  Visualisasi distribusi rating per user
       
        ![dist rating per user](image/distperuser.png)
@@ -139,11 +137,11 @@ Teknik data preparation atau preprocessing yang dilakukan adalah:
      book_id_to_title = dict(zip(books['book_id'], books['title']))
       ```
 - Variabel Rating
-   - Mengatasi data duplikat, tepatnya pada user yang memberi rating ke buku yang sama lebih dari sekali. Untuk menghindari bias dalam representasi preferensi
+   - Mengatasi data duplikat, tepatnya pada user yang memberi rating ke buku yang sama lebih dari sekali. Untuk menghindari bias dalam representasi preferensi.
 - Melakukan _merge_ (_inner join_) antara `books` dan `rating` agar hanya buku yang memiliki informasi judul (title) dan telah diberi rating oleh pengguna yang diproses oleh model, sehingga hasil rekomendasi bisa ditampilkan secara lengkap dan relevan.
 - Encoding `user_id` dan `book_id`, ini diperlukan agar ID bersifat contiguous (berurutan dari 0) dan cocok digunakan dalam embedding layer model deep learning, karena layer ini hanya menerima integer index, serta menjaga agar memori tetap efisien.
 - Splitting data menjadi test dan train wajib dilakukan sebelum melakukan pemodelan serta train model.
-- Scaling/standarisasi data supaya fitur numerik lebih stabil dan loss nantinya bisa terkontrol dan menghindari overfit
+- Scaling/standarisasi data supaya fitur numerik lebih stabil dan loss nantinya bisa terkontrol dan menghindari overfit.
 
 ## Modeling
 Pada tahap ini dikembangkan dua pendekatan sistem rekomendasi _collaborative filtering_ dengan algoritma yang berbeda, yaitu Matrix Factorization (menggunakan metode SVD) dan RecommenderNet (berbasis _deep learning_). Keduanya dirancang untuk memprediksi rating buku oleh pengguna dan menghasilkan Top-N rekomendasi yang dipersonalisasi sebagai berikut:
