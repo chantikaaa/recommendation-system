@@ -36,12 +36,12 @@ Menggunakan embedding layer untuk pengguna dan buku, dikombinasikan dengan hidde
 
 ## Data Understanding
 
-Dataset yang digunakan dalam proyek ini adalah *Goodbooks-10k Dataset*, yang tersedia secara publik di [Kaggle](https://www.kaggle.com/datasets/zygmunt/goodbooks-10k/data?select=ratings.csv). Dataset ini memuat informasi tentang lebih dari 10.000 buku beserta rating yang diberikan oleh lebih dari 53.000 pengguna, sehingga sangat cocok untuk membangun sistem rekomendasi berbasis collaborative filtering.
+Dataset yang digunakan dalam proyek ini adalah *Goodbooks-10k Dataset*, yang tersedia secara publik di [Kaggle](https://www.kaggle.com/datasets/zygmunt/goodbooks-10k/data?select=ratings.csv). Dataset ini memuat informasi tentang 10.000 buku beserta rating yang diberikan oleh lebih dari 53.000 pengguna, sehingga sangat cocok untuk membangun sistem rekomendasi berbasis collaborative filtering.
 
 Dataset ini terdiri dari beberapa file penting, dua di antaranya digunakan dalam proyek ini:
 
 1. **ratings.csv**
-   File ini menyimpan data interaksi eksplisit antara pengguna dan buku dalam bentuk skor rating. Terdapat total **978.408 entri** yang mencakup **53.424 pengguna (user\_id)** dan **10.000 buku (book\_id)**. Setiap pengguna telah memberikan minimal dua rating, dengan median jumlah rating per pengguna adalah delapan. Rating berada dalam rentang 1 hingga 5.
+   File ini menyimpan data interaksi eksplisit antara pengguna dan buku dalam bentuk skor rating. Terdapat total **981.756 entri** yang mencakup **53.424 pengguna (user\_id)** dan **10.000 buku (book\_id)**. Setiap pengguna telah memberikan minimal dua rating, dengan median jumlah rating per pengguna adalah delapan. Rating berada dalam rentang 1 hingga 5.
    Variabel-variabel dalam file ini antara lain:
 
    * `user_id`: ID unik pengguna (rentang 1–53.424).
@@ -50,21 +50,18 @@ Dataset ini terdiri dari beberapa file penting, dua di antaranya digunakan dalam
 
 2. **books.csv**
    File ini memuat metadata dari setiap buku yang tersedia. Terdapat total 10.000 buku, masing-masing dengan informasi tambahan seperti judul, penulis, tahun terbit, dan sebagainya.
-   Variabel-variabel utama:
+   Variabel-variabel yang ada pada file ini adalah `id`, `book_id`, `best_book_id`, `work_id`, `books_count`, `isbn`, `isbn13`, `authors`, `original_publication_year`, `original_title`, `title`, `language_code`, `average_rating`, `ratings_count`, `work_ratings_count`, `work_text_reviews_count`, `ratings_1`, `ratings_2`, `ratings_3`, `ratings_4`, `ratings_5`, `image_url`, `small_image_url`. Namun, untuk melakukan project ini hanya diperlukan beberapa variabel saja, yaitu sebagai berikut:
 
    * `book_id`: ID unik yang mengidentifikasi buku, digunakan untuk menghubungkan dengan file ratings.
    * `title`: Judul buku.
    * `authors`: Nama penulis buku.
    * `original_publication_year`: Tahun pertama kali diterbitkan.
    * `average_rating`: Rata-rata rating yang diterima dari semua pengguna.
-   * `ratings_count`: Jumlah total rating yang diterima buku.
-   * `image_url`: URL gambar sampul buku.
-   * `language_code`: Kode bahasa buku (jika tersedia).
 
 Selain dua file utama di atas, dataset ini juga menyertakan file tambahan seperti:
 
 * **to\_read.csv**: Menyimpan informasi buku-buku yang ditandai ingin dibaca oleh pengguna.
-* **book\_tags.csv** dan **tags.csv**: Menyediakan informasi tag atau label yang berkaitan dengan isi/topik buku, yang dapat digunakan untuk sistem rekomendasi berbasis konten (*content-based filtering*).
+* **book\_tags.csv** dan **tags.csv**: Menyediakan informasi tag atau label yang berkaitan dengan isi/topik buku, yang dapat digunakan untuk sistem rekomendasi berbasis konten (*content-based filtering*), namun pada project ini kurang relevan.
 
 Sebagian besar buku memiliki sekitar 100 ulasan, meskipun ada beberapa yang memiliki lebih sedikit. Baik `user_id` maupun `book_id` dalam dataset ini bersifat *contiguous* (berurutan dan tidak lompat-lompat), yang memudahkan proses encoding serta pemetaan kembali (*inverse mapping*) dalam sistem rekomendasi. Namun demikian, karena tidak semua pengguna memberikan rating pada semua buku, dataset ini bersifat sangat *sparse*, yang merupakan tantangan umum dalam pengembangan sistem rekomendasi.
 
@@ -80,8 +77,15 @@ Untuk memahami struktur dan kualitas data, beberapa langkah Exploratory Data Ana
       ![outlier books](image/outlier.png)
       
       Terdapat tahun -1750 pada fitur original_publication_year, yang merupakan outlier. Namun, karena fitur ini tidak akan digunakan dalam modelling, maka diabaikan saja.
-    - Memeriksa duplikasi data; Terdapat 36 buah baris duplikat judul, namun ketika dicek duplikat judul buku memang sama, namun data atribut/fitur lain berbeda.
+    - Memeriksa duplikasi data
+      
+      ![duplicates books](image/dupebooks.png)
+      
+      Terdapat 36 buah baris duplikat judul, namun ketika di-cek duplikat judul buku memang sama, namun data atribut/fitur lain berbeda.
     - Memeriksa data null; Terdapat 21 data null di `original_publication_year`, namun data null ini tidak perlu diatasi/dihilangkan.
+      
+      ![null books](image/nullbooks.png)
+      
     - Memeriksa nilai unik `book_id`; Sudah memiliki nilai unique yang sudah berupa integer terurut, sehingga kemungkinan tidak memerlukan proses encoding nantinya apabila nilai unik tetap.
     - Visualisasi distribusi average rating.
       
@@ -184,6 +188,9 @@ Model **RecommenderNet** menghasilkan nilai RMSE yang jauh lebih rendah dibandin
 
 ![learning curve](image/learningcurve.png)
 Performa ini juga tercermin dari **learning curve** RecommenderNet. Grafik menunjukkan penurunan tajam pada train loss di awal pelatihan dan kestabilan pada train maupun validation loss setelah beberapa epoch, menandakan model cepat konvergen dan tidak mengalami overfitting. Validation loss dan RMSE cenderung lebih rendah dibandingkan data latih, mengindikasikan generalisasi model yang sangat baik. Dengan performa validasi yang konsisten dan RMSE rendah, RecommenderNet terbukti lebih andal sebagai solusi sistem rekomendasi pada proyek ini.
+
+## Kesimpulan
+Berdasarkan hasil evaluasi, sistem rekomendasi yang dikembangkan telah berhasil memenuhi tujuan utama proyek, yaitu memberikan saran buku secara personal kepada pengguna. Dengan pendekatan collaborative filtering, sistem mampu memanfaatkan data interaksi historis antara pengguna dan buku untuk memprediksi preferensi secara akurat. Model Matrix Factorization dan RecommenderNet sama-sama memanfaatkan pola interaksi ini, namun RecommenderNet sebagai model deep learning menunjukkan performa yang lebih baik berdasarkan nilai RMSE yang lebih rendah. Hal ini menunjukkan bahwa RecommenderNet mampu menangkap kompleksitas hubungan non-linear antara pengguna dan item dengan lebih efektif, sehingga dapat memprediksi tingkat kesukaan pengguna terhadap buku tertentu secara lebih akurat. Dengan demikian, sistem rekomendasi yang dibangun tidak hanya memenuhi kebutuhan personalisasi, tetapi juga menunjukkan potensi dalam meningkatkan pengalaman pengguna melalui rekomendasi yang relevan dan tepat sasaran.
 
 ## Referensi
 [1] Onkar A. More, Shubham S. Kore, Kabir G. Kharade. "Book Recommendation System using Machine Learning," International Journal on Advanced Computer Theory and Engineering, vol. 14, no. 1, pp. 60–65, 2025. [Online]. Tersedia: journals.mriindia.com
